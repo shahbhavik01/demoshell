@@ -76,13 +76,10 @@ class DemoShell:
             pass
 
         else:
-            if any (str in key for str in ('mouse press','mouse release')):
-                pass
-            else:
-                self.extend_text(
-                    'error',
-                    'Unknown keypress {!r}'.format(key),
-                )
+            self.extend_text(
+                'error',
+                'Unknown keypress {!r}'.format(key),
+            )
 
     def _run_external_command(self, cmd):
         self.extend_text('command', cmd + '\n')
@@ -161,8 +158,6 @@ class DemoShell:
                     alias=line.split(" ",2)
                     alias[2]=alias[2].strip("\"")
                     self._aliases[alias[0]]=alias[2]
-
-        print(self._aliases)
 
 def main():        
                 
