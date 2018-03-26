@@ -39,7 +39,10 @@ class DemoShell:
             'clear': self._clear,
         }
 
+        self._aliases = {}
+
     def run(self):
+        self.read_aliases()
         self.loop = urwid.MainLoop(
             self.frame_widget,
             unhandled_input=self.on_enter,
@@ -54,6 +57,10 @@ class DemoShell:
         if key == 'enter':
             cmd = self.prompt_widget.text
             cmd = cmd.lstrip('$ ')
+
+            if cmd in self._aliases:
+                cmd = self._aliases[cmd]
+
             if cmd in self._builtins:
                 self._builtins[cmd]()
             elif cmd:
@@ -69,10 +76,13 @@ class DemoShell:
             pass
 
         else:
-            self.extend_text(
-                'error',
-                'Unknown keypress {!r}'.format(key),
-            )
+            if any (str in key for str in ('mouse press','mouse release')):
+                pass
+            else:
+                self.extend_text(
+                    'error',
+                    'Unknown keypress {!r}'.format(key),
+                )
 
     def _run_external_command(self, cmd):
         self.extend_text('command', cmd + '\n')
@@ -130,6 +140,7 @@ class DemoShell:
             new_text = parts[loc][1] + text
             parts[loc] = (parts[loc][0], new_text)
         else:
+            #print(key)
             raise ValueError('unknown style {} used for {!r}'.format(
                 style, text))
         self.output_widget.set_text(parts)
@@ -137,8 +148,24 @@ class DemoShell:
     def received_output(self, data, style):
         self.extend_text(style, data.decode('utf-8'))
 
+    # Currently the aliases needs to be in the following format: alias = "command"
+    # For example: ll = "ls -la"
+    # Please keep the spaces " " in mind in demoshell.cfg file
+    def read_aliases(self):
+        with open ('demoshell.cfg','r') as configfile:
+            for line in configfile:
+                if "[aliases]" in line:
+                    pass
+                else:
+                    line=line.strip("\n")
+                    alias=line.split(" ",2)
+                    alias[2]=alias[2].strip("\"")
+                    self._aliases[alias[0]]=alias[2]
 
-def main():
+        print(self._aliases)
+
+def main():        
+                
     DemoShell().run()
 
 if __name__ == '__main__':
